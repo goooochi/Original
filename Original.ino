@@ -111,24 +111,32 @@ void setup()
 void loop() {
   int analogValue = analogRead(analogInputPin);
   int buttonState = digitalRead(BOARD_BUTTON_PIN);
-
-
-  //セグメントを表示する
-
   
+  //初期設定
+  dxl_wb.goalVelocity(DXL_ID_1,speed);
+  dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
+  dxl_wb.goalVelocity(DXL_ID_2,speed);
+  dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
+
+
   //ボタンによるタイマーセット
   if(buttonState == HIGH){
-    digitalWrite(BOARD_LED_PIN,LOW);
+    //セグメントに数字を表示
+
+    //短針を動かす
+    
   }else{
     //ボタンが押されたとき
-    digitalWrite(BOARD_LED_PIN,HIGH);
+    //セグメントに表示された数字の時刻に短針を合わせる
+
+    //秒針＋短針をまわす
+    
+
+
   }
 
-  dxl_wb.goalVelocity(dxl_id,speed);
-  dxl_wb.goalPosition(dxl_id, (int32_t)512);
 
-
-  
+  //条件分岐で
 }
 
 
