@@ -36,6 +36,7 @@ int32_t speed = 0.1;
 const int analogInputPin = 1;
 
 bool result;
+bool isTimerSet;
 
 void setup() 
 {
@@ -46,6 +47,7 @@ void setup()
 
   const char *log;
   result = false;
+  isTimerSet = true;
 
   uint16_t model_number = 0;
 
@@ -96,6 +98,11 @@ void setup()
 
   result = dxl_wb.jointMode(DXL_ID_1, 0, 0, &log);
   result = dxl_wb.jointMode(DXL_ID_2, 0, 0, &log);
+  //初期設定
+  dxl_wb.goalVelocity(DXL_ID_1,speed);
+  dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
+  dxl_wb.goalVelocity(DXL_ID_2,speed);
+  dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
 
   pinMode(G, OUTPUT);    // digitPinを出力モードに設定する
   pinMode(F, OUTPUT);    // digitPinを出力モードに設定する
@@ -111,28 +118,40 @@ void setup()
 void loop() {
   int analogValue = analogRead(analogInputPin);
   int buttonState = digitalRead(BOARD_BUTTON_PIN);
-  
-  //初期設定
-  dxl_wb.goalVelocity(DXL_ID_1,speed);
-  dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
-  dxl_wb.goalVelocity(DXL_ID_2,speed);
-  dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
 
 
   //ボタンによるタイマーセット
   if(buttonState == HIGH){
     //セグメントに数字を表示
-
+    if(analogValue < 100){
+      Number_1_ON();
+    }else if(100 <= analogValue && analogValue < 200){
+      Number_2_ON();
+    }else if(200 <= analogValue && analogValue < 300){
+      Number_3_ON();
+    }else if(300 <= analogValue && analogValue < 400){
+      Number_4_ON();
+    }else if(400 <= analogValue && analogValue < 500){
+      Number_5_ON(); 
+    }else if(500 <= analogValue && analogValue < 600){
+      Number_6_ON();
+    }else if(600 <= analogValue && analogValue < 700){
+      Number_7_ON();
+    }else if(700 <= analogValue && analogValue < 800){
+      Number_8_ON();
+    }else if(800 <= analogValue && analogValue < 900){
+      Number_9_ON();
+    }
     //短針を動かす
     
   }else{
-    //ボタンが押されたとき
+    //ボタンが押されたとき,セグメントの数字を消す
+    // isTimerSet = false;
+    Number_6_ON();
     //セグメントに表示された数字の時刻に短針を合わせる
 
     //秒針＋短針をまわす
     
-
-
   }
 
 
@@ -370,6 +389,17 @@ void Number_9_OFF(){
   digitalWrite(A, DIGIT_OFF);      // digitPinをオンにする
   digitalWrite(B, DIGIT_OFF);      // digitPinをオンにする
   digitalWrite(C, DIGIT_OFF);      // digitPinをオンにする
+
+}
+
+void NumberOff(){
+  digitalWrite(G, DIGIT_OFF);    
+  digitalWrite(F, DIGIT_OFF);    
+  digitalWrite(E, DIGIT_OFF); 
+  digitalWrite(D, DIGIT_OFF);   
+  digitalWrite(A, DIGIT_OFF);   
+  digitalWrite(B, DIGIT_OFF);  
+  digitalWrite(C, DIGIT_OFF);   
 
 }
 
