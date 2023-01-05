@@ -37,6 +37,7 @@ const int analogInputPin = 1;
 
 bool result;
 bool isTimerSet;
+bool startRotation;
 
 void setup() 
 {
@@ -47,62 +48,33 @@ void setup()
 
   const char *log;
   result = false;
-  isTimerSet = true;
+  isTimerSet = false;
+  startRotation = false;
 
   uint16_t model_number = 0;
-
 
   //セットアップが完了しているかを3工程で確認する
   result = dxl_wb.init(DEVICE_NAME, BAUDRATE, &log);
 
-  if (result == false)
-  {
-    Serial.println(log);
-    Serial.println("Failed to init");
-  }
-  else
-  {
-    Serial.print("Succeeded to init : ");
-    Serial.println(BAUDRATE);  
-  }
-
   result = dxl_wb.ping(DXL_ID_1, &model_number, &log);
-  if (result == false)
-  {
-    Serial.println(log);
-    Serial.println("Failed to ping");
-  }
-  else
-  {
-    Serial.println("Succeeded to ping");
-    Serial.print("id : ");
-    Serial.print(dxl_id);
-    Serial.print(" model_number : ");
-    Serial.println(model_number);
-  }
-
   result = dxl_wb.ping(DXL_ID_2, &model_number, &log);
-  if (result == false)
-  {
-    Serial.println(log);
-    Serial.println("Failed to ping");
-  }
-  else
-  {
-    Serial.println("Succeeded to ping");
-    Serial.print("id : ");
-    Serial.print(dxl_id);
-    Serial.print(" model_number : ");
-    Serial.println(model_number);
-  }
 
   result = dxl_wb.jointMode(DXL_ID_1, 0, 0, &log);
   result = dxl_wb.jointMode(DXL_ID_2, 0, 0, &log);
+
+  //変更前
+  // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 1));
+  // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 2));
   //初期設定
   dxl_wb.goalVelocity(DXL_ID_1,speed);
   dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
   dxl_wb.goalVelocity(DXL_ID_2,speed);
   dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
+  //変更後
+  // Serial.print(dxl_wb. (PRESENT_POSITION, 1));
+  // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 2));
+
+  dxl_wb.getItemInfo(DXL_ID_1, PRESENT_POSITION);
 
   pinMode(G, OUTPUT);    // digitPinを出力モードに設定する
   pinMode(F, OUTPUT);    // digitPinを出力モードに設定する
@@ -121,20 +93,37 @@ void loop() {
 
 
   //ボタンによるタイマーセット
-  if(buttonState == HIGH){
-    //セグメントに数字を表示
+  if(buttonState == HIGH && !isTimerSet){
+    //ボタンが押された
+    //短針を動かす
+    
+    isTimerSet = true;
+    startRotation = true;
+  }else if(buttonState == LOW && !isTimerSet){
     if(analogValue < 100){
       Number_1_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)409);
     }else if(100 <= analogValue && analogValue < 200){
       Number_2_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)307);
     }else if(200 <= analogValue && analogValue < 300){
       Number_3_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)205);
     }else if(300 <= analogValue && analogValue < 400){
       Number_4_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)102);
     }else if(400 <= analogValue && analogValue < 500){
-      Number_5_ON(); 
+      Number_5_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)0);
     }else if(500 <= analogValue && analogValue < 600){
       Number_6_ON();
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, (int32_t)2048);
     }else if(600 <= analogValue && analogValue < 700){
       Number_7_ON();
     }else if(700 <= analogValue && analogValue < 800){
@@ -142,20 +131,26 @@ void loop() {
     }else if(800 <= analogValue && analogValue < 900){
       Number_9_ON();
     }
-    //短針を動かす
-    
-  }else{
-    //ボタンが押されたとき,セグメントの数字を消す
-    // isTimerSet = false;
-    Number_6_ON();
-    //セグメントに表示された数字の時刻に短針を合わせる
-
-    //秒針＋短針をまわす
-    
   }
 
+  //秒針＋短針をまわす
+  if(startRotation){
+      NumberOff();
+      dxl_wb.wheelMode(DXL_ID_1);
+      dxl_wb.goalSpeed(DXL_ID_1, 100);
+      dxl_wb.wheelMode(DXL_ID_2);
+      dxl_wb.goalSpeed(DXL_ID_2, 100);
+      delay(1000);
 
-  //条件分岐で
+      //短針が12時を指した時を検知
+
+      // if(){
+      //   startRotation = false;
+      // }
+  }
+
+  //変数のリセット
+  
 }
 
 
