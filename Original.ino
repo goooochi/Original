@@ -1,7 +1,4 @@
-/*
-モーターを回す
-*/
-
+//タイマー
 #include <DynamixelWorkbench.h>
 
 #if defined(__OPENCM904__)
@@ -34,6 +31,9 @@ int32_t speed = 0.1;
 
 //アナログピンの設定
 const int analogInputPin = 1;
+
+int minuteNumber = 0;
+int minutePosition[5];
 
 bool result;
 bool isTimerSet;
@@ -74,7 +74,6 @@ void setup()
   // Serial.print(dxl_wb. (PRESENT_POSITION, 1));
   // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 2));
 
-  dxl_wb.getItemInfo(DXL_ID_1, PRESENT_POSITION);
 
   pinMode(G, OUTPUT);    // digitPinを出力モードに設定する
   pinMode(F, OUTPUT);    // digitPinを出力モードに設定する
@@ -84,6 +83,13 @@ void setup()
   pinMode(B, OUTPUT);    // digitPinを出力モードに設定する
   pinMode(C, OUTPUT);    // digitPinを出力モードに設定する
 
+
+  minutePosition[0] = 512;
+  minutePosition[1] = 409;
+  minutePosition[2] = 307;
+  minutePosition[3] = 205;
+  minutePosition[4] = 102;
+  minutePosition[5] = 0;  //５分
 }
 
 
@@ -91,66 +97,64 @@ void loop() {
   int analogValue = analogRead(analogInputPin);
   int buttonState = digitalRead(BOARD_BUTTON_PIN);
 
-
   //ボタンによるタイマーセット
   if(buttonState == HIGH && !isTimerSet){
     //ボタンが押された
     //短針を動かす
-    
     isTimerSet = true;
     startRotation = true;
   }else if(buttonState == LOW && !isTimerSet){
     if(analogValue < 100){
+      minuteNumber = 1;
       Number_1_ON();
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, (int32_t)409);
     }else if(100 <= analogValue && analogValue < 200){
+      minuteNumber = 2;
       Number_2_ON();
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, (int32_t)307);
     }else if(200 <= analogValue && analogValue < 300){
+      minuteNumber = 3;
       Number_3_ON();
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, (int32_t)205);
     }else if(300 <= analogValue && analogValue < 400){
+      minuteNumber = 4;
       Number_4_ON();
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, (int32_t)102);
     }else if(400 <= analogValue && analogValue < 500){
+      minuteNumber = 5;
       Number_5_ON();
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, (int32_t)0);
-    }else if(500 <= analogValue && analogValue < 600){
-      Number_6_ON();
-      dxl_wb.goalVelocity(DXL_ID_2,speed);
-      dxl_wb.goalPosition(DXL_ID_2, (int32_t)2048);
-    }else if(600 <= analogValue && analogValue < 700){
-      Number_7_ON();
-    }else if(700 <= analogValue && analogValue < 800){
-      Number_8_ON();
-    }else if(800 <= analogValue && analogValue < 900){
-      Number_9_ON();
     }
   }
 
   //秒針＋短針をまわす
   if(startRotation){
+      //７セグメントの明かりを削除
       NumberOff();
-      dxl_wb.wheelMode(DXL_ID_1);
-      dxl_wb.goalSpeed(DXL_ID_1, 100);
-      dxl_wb.wheelMode(DXL_ID_2);
-      dxl_wb.goalSpeed(DXL_ID_2, 100);
-      delay(1000);
+      //長針が1分で一周する
+      //短針がX分で元に戻る
+      // dxl_wb.wheelMode(DXL_ID_1);
+      // dxl_wb.goalSpeed(DXL_ID_1, 50|0x400);
 
-      //短針が12時を指した時を検知
-
-      // if(){
-      //   startRotation = false;
-      // }
+    for (int count = minuteNumber - 1; count >= 0; count--)
+    {
+      delay(60000);
+      dxl_wb.goalVelocity(DXL_ID_2,speed);
+      dxl_wb.goalPosition(DXL_ID_2, minutePosition[count]);
+    }
+        
   }
 
-  //変数のリセット
-  
+  startRotation = false;
+  ShowTextF();
+  delay(5000);
+  NumberOff();
+
 }
 
 
@@ -396,6 +400,16 @@ void NumberOff(){
   digitalWrite(B, DIGIT_OFF);  
   digitalWrite(C, DIGIT_OFF);   
 
+}
+
+void ShowTextF(){
+  digitalWrite(G, DIGIT_ON);    
+  digitalWrite(F, DIGIT_ON);    
+  digitalWrite(E, DIGIT_ON); 
+  digitalWrite(D, DIGIT_OFF);   
+  digitalWrite(A, DIGIT_ON);   
+  digitalWrite(B, DIGIT_OFF);  
+  digitalWrite(C, DIGIT_OFF);   
 }
 
 
