@@ -2,7 +2,7 @@
 #include <DynamixelWorkbench.h>
 
 #if defined(__OPENCM904__)
-  #define DEVICE_NAME "/dev/cu.usbmodem21401" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
+  #define DEVICE_NAME "/dev/cu.usbmodem11401" //Dynamixel on Serial3(USART3)  <-OpenCM 485EXP
 #elif defined(__OPENCR__)
   #define DEVICE_NAME ""
 #endif   
@@ -38,6 +38,7 @@ int minutePosition[5];
 bool result;
 bool isTimerSet;
 bool startRotation;
+bool timerFinish;
 
 void setup() 
 {
@@ -50,6 +51,7 @@ void setup()
   result = false;
   isTimerSet = false;
   startRotation = false;
+  timerFinish = false;
 
   uint16_t model_number = 0;
 
@@ -66,10 +68,7 @@ void setup()
   // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 1));
   // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 2));
   //初期設定
-  dxl_wb.goalVelocity(DXL_ID_1,speed);
-  dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
-  dxl_wb.goalVelocity(DXL_ID_2,speed);
-  dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
+  SetUp();
   //変更後
   // Serial.print(dxl_wb. (PRESENT_POSITION, 1));
   // Serial.print(dxl_wb.readControlTableItem(PRESENT_POSITION, 2));
@@ -138,22 +137,28 @@ void loop() {
       NumberOff();
       //長針が1分で一周する
       //短針がX分で元に戻る
-      // dxl_wb.wheelMode(DXL_ID_1);
-      // dxl_wb.goalSpeed(DXL_ID_1, 50|0x400);
+      dxl_wb.wheelMode(DXL_ID_1);
+      dxl_wb.goalSpeed(DXL_ID_1, 55|0x400);
 
     for (int count = minuteNumber - 1; count >= 0; count--)
     {
-      delay(60000);
+      delay(10000);
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, minutePosition[count]);
     }
-        
+    timerFinish = true;
+    dxl_wb.goalSpeed(DXL_ID_1,0);
   }
 
-  startRotation = false;
-  ShowTextF();
-  delay(5000);
-  NumberOff();
+  if(timerFinish){
+    startRotation = false;
+    ShowTextF();
+    delay(5000);
+    NumberOff();
+    SetUp();
+    isTimerSet = false;
+    timerFinish = false;
+  }
 
 }
 
@@ -410,6 +415,14 @@ void ShowTextF(){
   digitalWrite(A, DIGIT_ON);   
   digitalWrite(B, DIGIT_OFF);  
   digitalWrite(C, DIGIT_OFF);   
+}
+
+void SetUp(){
+  //初期設定
+  dxl_wb.goalVelocity(DXL_ID_1,speed);
+  dxl_wb.goalPosition(DXL_ID_1, (int32_t)512);
+  dxl_wb.goalVelocity(DXL_ID_2,speed);
+  dxl_wb.goalPosition(DXL_ID_2, (int32_t)512);
 }
 
 
