@@ -35,6 +35,7 @@ const int analogInputPin = 1;
 int minuteNumber = 0;
 int minutePosition[5];
 
+//ブロックごとの真偽値処理
 bool result;
 bool isTimerSet;
 bool startRotation;
