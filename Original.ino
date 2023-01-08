@@ -143,7 +143,7 @@ void loop() {
 
     for (int count = minuteNumber - 1; count >= 0; count--)
     {
-      delay(10000);
+      delay(60000);
       dxl_wb.goalVelocity(DXL_ID_2,speed);
       dxl_wb.goalPosition(DXL_ID_2, minutePosition[count]);
     }
