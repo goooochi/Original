@@ -16,12 +16,14 @@
 #define DIGIT_OFF HIGH
 #define SEGMENT_ON HIGH
 #define SEGMENT_OFF LOW
-const int G = 8;// F
-const int F = 9;// F
-const int E = 10;// F
-const int D = 11;// F
-const int A = 12;// F
-const int B = 13;// F
+
+//7セグメントのためのピン設定
+const int G = 8;
+const int F = 9;
+const int E = 10;
+const int D = 11;
+const int A = 12;
+const int B = 13;
 const int C = 14;
 
 //Dynamixel周辺
@@ -32,6 +34,7 @@ int32_t speed = 0.1;
 //アナログピンの設定
 const int analogInputPin = 1;
 
+//配列
 int minuteNumber = 0;
 int minutePosition[5];
 
@@ -47,7 +50,8 @@ void setup()
   pinMode(BOARD_BUTTON_PIN, INPUT_PULLDOWN);
   pinMode(BOARD_LED_PIN, OUTPUT);
   Serial.begin(115200);
-
+  
+  //真理値の初期化
   const char *log;
   result = false;
   isTimerSet = false;
@@ -83,13 +87,13 @@ void setup()
   pinMode(B, OUTPUT);    // digitPinを出力モードに設定する
   pinMode(C, OUTPUT);    // digitPinを出力モードに設定する
 
-
-  minutePosition[0] = 512;
-  minutePosition[1] = 409;
-  minutePosition[2] = 307;
-  minutePosition[3] = 205;
-  minutePosition[4] = 102;
-  minutePosition[5] = 0;  //５分
+  //配列の要素に、12時〜17時までの角度を代入する
+  minutePosition[0] = 512;//12時
+  minutePosition[1] = 409;//13時
+  minutePosition[2] = 307;//14時
+  minutePosition[3] = 205;//15時
+  minutePosition[4] = 102;//16時
+  minutePosition[5] = 0;  //17時
 }
 
 
@@ -418,6 +422,7 @@ void ShowTextF(){
   digitalWrite(C, DIGIT_OFF);   
 }
 
+//12時を指す方向へ
 void SetUp(){
   //初期設定
   dxl_wb.goalVelocity(DXL_ID_1,speed);
